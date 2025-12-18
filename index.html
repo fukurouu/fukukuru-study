@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Study Ops Hub</title>
+  <title>Fukukuru Studies</title>
   <style>
     :root{
       --bg: #ffe6f0;          /* FULL pale pink */
@@ -206,13 +206,22 @@
 
     /* wheel */
     .wheelWrap{display:flex; flex-direction:column; align-items:center; gap:10px; padding: 6px 0}
+
+    /* NEW: quotes */
+    .quoteLine{
+      text-align:center;
+      font-weight: 900;
+      color: rgba(0,0,0,0.70);
+      font-size: 13px;
+      padding: 6px 10px;
+    }
   </style>
 </head>
 
 <body>
 <header>
   <div>
-    <div class="brand">Study Ops Hub</div>
+    <div class="brand">Fukukuru Studies</div>
     <div class="sub">Pale pink. Calendar boxes. Wheel. Stopwatch tracker. Tasks.</div>
   </div>
   <div class="row">
@@ -261,6 +270,9 @@
 
     <div style="height:10px"></div>
     <div id="taskList" class="muted">No tasks yet.</div>
+
+    <!-- NEW: quote right below tasks -->
+    <div class="quoteLine">“I find that the harder I work, the more luck I seem to have.”</div>
 
     <div class="divider"></div>
 
@@ -318,6 +330,9 @@
       <div class="wheelWrap">
         <canvas id="wheel" width="360" height="360"></canvas>
         <div class="pill" id="wheelResult">Picked: <b>—</b></div>
+
+        <!-- NEW: quote right below wheel -->
+        <div class="quoteLine">“没有那么多的事与愿违”</div>
       </div>
     </div>
 
