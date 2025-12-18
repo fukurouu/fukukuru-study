@@ -1,0 +1,1317 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Study Ops Hub</title>
+  <style>
+    :root{
+      --bg: #ffe6f0;          /* FULL pale pink */
+      --card: rgba(255,255,255,0.88);
+      --border: rgba(0,0,0,0.10);
+      --text: rgba(0,0,0,0.85);
+      --muted: rgba(0,0,0,0.55);
+      --shadow: 0 12px 30px rgba(0,0,0,0.08);
+      --r: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color: var(--text);
+      background: var(--bg);
+      min-height:100vh;
+    }
+    header{
+      padding: 18px 18px 10px;
+      max-width: 1250px;
+      margin: 0 auto;
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap: wrap;
+    }
+    .brand{font-weight: 1000; font-size: 22px;}
+    .sub{color: var(--muted); font-size: 13px; margin-top:2px;}
+    .row{display:flex; gap:8px; align-items:center; flex-wrap: wrap;}
+    .btn{
+      border: 1px solid var(--border);
+      background: white;
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+      font-weight: 800;
+    }
+    .btn:disabled{opacity:0.6; cursor:not-allowed}
+    .btnGhost{
+      border: 1px solid var(--border);
+      background: transparent;
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight: 800;
+      color: rgba(0,0,0,0.75);
+    }
+    .chip{
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.7);
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 12px;
+      color: rgba(0,0,0,0.7);
+    }
+
+    main{
+      max-width: 1250px;
+      margin: 0 auto;
+      padding: 10px 18px 30px;
+      display:grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 1050px){ main{grid-template-columns:1fr} }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      backdrop-filter: blur(8px);
+    }
+    .cardHeader{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .title{font-weight: 1000; font-size: 16px}
+    .muted{color:var(--muted); font-size: 13px}
+    .tiny{font-size:12px; color: var(--muted)}
+    .divider{height:1px; background: var(--border); margin: 12px 0;}
+    .inp, select{
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 10px;
+      outline:none;
+      background: rgba(255,255,255,0.92);
+      font-size: 14px;
+    }
+    label{font-size:12px; color: var(--muted); font-weight:800}
+    .grid2{display:grid; grid-template-columns: 1fr 1fr; gap: 10px}
+    @media (max-width: 1050px){ .grid2{grid-template-columns:1fr} }
+    canvas{max-width:100%}
+
+    /* calendar grid */
+    .monthLabel{font-weight:1000; font-size:14px}
+    .calGrid{
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .calHead{
+      font-size:12px;
+      color: var(--muted);
+      font-weight:900;
+      padding: 4px 2px;
+      text-align:center;
+    }
+    .calCell{
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.80);
+      border-radius: 14px;
+      padding: 6px;              /* shorter */
+      min-height: 64px;          /* shorter boxes */
+      cursor:pointer;
+      display:flex;
+      flex-direction:column;
+      gap:4px;                   /* tighter */
+    }
+    .calCell.dim{ opacity: 0.55; }
+    .calCell.sel{
+      outline: 3px solid rgba(0,0,0,0.10);
+      background: rgba(255,255,255,0.95);
+    }
+    .calNumRow{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+    .calNum{font-weight:1000; font-size:12px}
+    .dot{
+      font-size:11px;
+      font-weight:1000;
+      padding: 1px 7px;          /* shorter */
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.9);
+      min-width: 22px;
+      text-align:center;
+      line-height: 16px;
+      height: 18px;
+    }
+    .miniEvt{
+      display:flex;
+      gap:6px;
+      font-size:10.5px;          /* slightly smaller */
+      color: rgba(0,0,0,0.72);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .miniTime{font-weight:1000; opacity:0.75}
+
+    /* cards list */
+    .item{
+      border:1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px;
+      background: rgba(255,255,255,0.82);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 10px;
+    }
+    .tag{
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      font-weight: 1000;
+      font-size: 12px;
+      background: rgba(255,255,255,0.92);
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+    }
+    .pill{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.88);
+      border: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 900;
+    }
+    .big{
+      font-size: 30px;
+      font-weight: 1100;
+      letter-spacing: -0.6px;
+    }
+
+    /* wheel */
+    .wheelWrap{display:flex; flex-direction:column; align-items:center; gap:10px; padding: 6px 0}
+  </style>
+</head>
+
+<body>
+<header>
+  <div>
+    <div class="brand">Study Ops Hub</div>
+    <div class="sub">Pale pink. Calendar boxes. Wheel. Stopwatch tracker. Tasks.</div>
+  </div>
+  <div class="row">
+    <span class="chip" id="saveStatus">Saved</span>
+    <button class="btnGhost" id="exportBtn">Export</button>
+    <button class="btnGhost" id="importBtn">Import</button>
+    <input type="file" id="importFile" accept=".json" style="display:none"/>
+    <button class="btn" id="resetBtn">Reset</button>
+  </div>
+</header>
+
+<main>
+  <!-- LEFT: TASKS + EVENTS + CALENDAR -->
+  <section class="card">
+    <div class="cardHeader">
+      <div>
+        <div class="title">Tasks + Events + Calendar</div>
+        <div class="muted">Tasks (by module) → Events (selected date) → Calendar grid.</div>
+      </div>
+      <div class="row">
+        <button class="btnGhost" id="prevMonth">◀</button>
+        <div class="monthLabel" id="monthLabel">—</div>
+        <button class="btnGhost" id="nextMonth">▶</button>
+      </div>
+    </div>
+
+    <!-- TASK LIST (BY MODULE) -->
+    <div class="title" style="margin-bottom:6px">Task List (by module)</div>
+
+    <div class="grid2">
+      <div>
+        <label>Module</label>
+        <select class="inp" id="taskModule"></select>
+      </div>
+      <div>
+        <label>Task</label>
+        <input class="inp" id="taskText" placeholder="e.g., Finish WS, revise Lesson 6"/>
+      </div>
+    </div>
+
+    <div style="height:10px"></div>
+    <div class="row">
+      <button class="btn" id="addTaskBtn">Add Task</button>
+      <button class="btnGhost" id="clearDoneBtn">Clear Done</button>
+    </div>
+
+    <div style="height:10px"></div>
+    <div id="taskList" class="muted">No tasks yet.</div>
+
+    <div class="divider"></div>
+
+    <!-- EVENT FORM -->
+    <div class="title" style="margin-bottom:6px">Add Event</div>
+
+    <div class="grid2">
+      <div>
+        <label>Selected date</label>
+        <input class="inp" type="date" id="evtDate"/>
+      </div>
+      <div>
+        <label>Time</label>
+        <input class="inp" type="time" id="evtTime" value="18:00"/>
+      </div>
+    </div>
+
+    <div style="height:10px"></div>
+
+    <label>Title</label>
+    <input class="inp" id="evtTitle" placeholder="e.g., Quiz, CA submission"/>
+
+    <div style="height:10px"></div>
+
+    <label>Module (optional)</label>
+    <select class="inp" id="evtModule"></select>
+
+    <div style="height:10px"></div>
+    <button class="btn" id="addEvtBtn">Add Event</button>
+
+    <div class="divider"></div>
+
+    <!-- EVENTS LIST MOVED UP -->
+    <div class="title" style="margin-bottom:6px">Events on selected date</div>
+    <div id="evtList" class="muted">No events.</div>
+
+    <div class="divider"></div>
+
+    <!-- CALENDAR -->
+    <div class="calGrid" id="calGrid"></div>
+  </section>
+
+  <!-- RIGHT: WHEEL + STOPWATCH + ANALYTICS -->
+  <section style="display:flex; flex-direction:column; gap:14px;">
+
+    <div class="card">
+      <div class="cardHeader">
+        <div>
+          <div class="title">Spin Wheel</div>
+          <div class="muted">Click the wheel or press Spin.</div>
+        </div>
+        <button class="btn" id="spinBtn">Spin</button>
+      </div>
+
+      <div class="wheelWrap">
+        <canvas id="wheel" width="360" height="360"></canvas>
+        <div class="pill" id="wheelResult">Picked: <b>—</b></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cardHeader">
+        <div>
+          <div class="title">Stopwatch Study Tracker</div>
+          <div class="muted">Start → Pause/Resume → Stop & Save to the selected date + module.</div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div>
+          <label>Date</label>
+          <input class="inp" type="date" id="swDate"/>
+        </div>
+        <div>
+          <label>Module</label>
+          <select class="inp" id="swModule"></select>
+        </div>
+      </div>
+
+      <div style="height:10px"></div>
+
+      <div class="row" style="justify-content:space-between; align-items:flex-end;">
+        <div>
+          <div class="big" id="swTime">0:00:00</div>
+          <div class="tiny" id="swHint">Ready.</div>
+        </div>
+        <div class="row">
+          <button class="btn" id="swStartBtn">Start</button>
+          <button class="btnGhost" id="swPauseBtn" disabled>Pause</button>
+          <button class="btnGhost" id="swStopBtn" disabled>Stop & Save</button>
+          <button class="btnGhost" id="swResetBtn">Reset</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="title" style="margin-bottom:6px">Saved sessions (selected date)</div>
+      <div id="swSessions" class="muted">No sessions yet.</div>
+    </div>
+
+    <div class="card">
+      <div class="cardHeader">
+        <div>
+          <div class="title">Analytics (Daily / Weekly / Monthly)</div>
+          <div class="muted">Compare totals by module in a period.</div>
+        </div>
+        <div class="row">
+          <select class="inp" id="periodType" style="min-width: 180px;">
+            <option value="day">Day</option>
+            <option value="week">Week (Mon–Sun)</option>
+            <option value="month">Month</option>
+          </select>
+          <input class="inp" type="date" id="periodDate" style="min-width: 180px;"/>
+          <button class="btnGhost" id="prevPeriod">◀</button>
+          <button class="btnGhost" id="nextPeriod">▶</button>
+        </div>
+      </div>
+
+      <div class="row" style="justify-content:space-between; align-items:flex-end;">
+        <div>
+          <div class="big" id="periodLabel">—</div>
+          <div class="muted" id="periodMeta">—</div>
+        </div>
+        <div class="pill" id="periodTotal">Total: 0.00h</div>
+      </div>
+
+      <div style="height:10px"></div>
+      <canvas id="barChart" width="820" height="260"></canvas>
+
+      <div class="divider"></div>
+      <div class="title" style="margin-bottom:6px">Breakdown</div>
+      <div id="breakdown" class="muted">—</div>
+    </div>
+
+  </section>
+</main>
+
+<script>
+  const LS_KEY = "study_ops_pink_stopwatch_tasks_v1";
+  const PASTELS = ["#ffd1dc","#cfe8ff","#e6d7ff","#cffff0","#fff2b8","#ffd9f5","#d7fff0"];
+  const $ = (id) => document.getElementById(id);
+
+  const DEFAULT = {
+    modules: [
+      { id: "A309", name: "A309 Environmental Management & Assessment", enabled: true },
+      { id: "A319", name: "A319 Environmental Data Analysis", enabled: true },
+      { id: "A324", name: "A324 Resource Management & Circular Economy", enabled: true },
+      { id: "A325", name: "A325 Workplace Safety & Health", enabled: true },
+      { id: "A334", name: "A334 Pollution Control & Monitoring", enabled: true },
+    ],
+    tasks: [],   // {id,moduleId,text,done,createdAt}
+    events: [],  // {id,date,time,title,moduleId}
+    sessions: [],// {id,date,moduleId,ms,createdAt}
+    calendarCursor: null,
+    selectedDate: null
+  };
+
+  function clone(x){ return JSON.parse(JSON.stringify(x)); }
+  function load(){
+    try{
+      const raw = localStorage.getItem(LS_KEY);
+      if(!raw) return clone(DEFAULT);
+      const obj = JSON.parse(raw);
+      return { ...clone(DEFAULT), ...obj };
+    }catch{
+      return clone(DEFAULT);
+    }
+  }
+  let state = load();
+
+  function save(){
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+    const s = $("saveStatus");
+    if(s){
+      s.textContent = "Saved";
+      s.style.opacity = "1";
+      setTimeout(()=> s.style.opacity="0.78", 650);
+    }
+  }
+  function uuid(){
+    return (crypto.randomUUID && crypto.randomUUID()) || String(Date.now()+Math.random());
+  }
+
+  function pad2(n){ return String(n).padStart(2,"0"); }
+  function ymd(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+  function parseYMD(s){ const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); }
+  function todayYMD(){ return new Date().toISOString().slice(0,10); }
+  function startOfMonth(d){ return new Date(d.getFullYear(), d.getMonth(), 1); }
+  function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+  function addMonths(d,n){ return new Date(d.getFullYear(), d.getMonth()+n, 1); }
+  function startOfWeek(d){
+    const x=new Date(d);
+    const day=(x.getDay()+6)%7; // Mon=0
+    x.setDate(x.getDate()-day);
+    x.setHours(0,0,0,0);
+    return x;
+  }
+  function endOfWeek(d){
+    const s=startOfWeek(d);
+    const e=addDays(s,6);
+    e.setHours(23,59,59,999);
+    return e;
+  }
+  function prettyDate(ymdStr){
+    const dt=parseYMD(ymdStr);
+    return dt.toLocaleDateString(undefined,{weekday:"short",year:"numeric",month:"short",day:"numeric"});
+  }
+  function fmtRange(a,b){
+    return `${a.toLocaleDateString(undefined,{day:"2-digit",month:"short"})} – ${b.toLocaleDateString(undefined,{day:"2-digit",month:"short",year:"numeric"})}`;
+  }
+  function escapeHtml(s){
+    return String(s||"")
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
+
+  // -------------------- MODULE DROPDOWNS --------------------
+  function refreshModuleSelects(){
+    const modOpts = state.modules.map(m => `<option value="${m.id}">${m.id} — ${m.name}</option>`).join("");
+    $("evtModule").innerHTML = `<option value="">(None)</option>` + modOpts;
+    $("swModule").innerHTML = modOpts;
+    $("taskModule").innerHTML = modOpts;
+  }
+
+  // -------------------- TASKS --------------------
+  function renderTasks(){
+    const wrap = $("taskList");
+    const tasks = Array.isArray(state.tasks) ? [...state.tasks] : [];
+
+    if(tasks.length === 0){
+      wrap.textContent = "No tasks yet.";
+      return;
+    }
+
+    // group by module
+    const byModule = new Map();
+    for(const m of state.modules) byModule.set(m.id, []);
+    for(const t of tasks){
+      if(!byModule.has(t.moduleId)) byModule.set(t.moduleId, []);
+      byModule.get(t.moduleId).push(t);
+    }
+
+    // sort: undone first, newest first
+    for(const [k, arr] of byModule.entries()){
+      arr.sort((a,b)=>{
+        if(!!a.done !== !!b.done) return a.done ? 1 : -1;
+        return (b.createdAt||0) - (a.createdAt||0);
+      });
+    }
+
+    const container = document.createElement("div");
+    container.style.display = "flex";
+    container.style.flexDirection = "column";
+    container.style.gap = "10px";
+
+    for(const m of state.modules){
+      const arr = byModule.get(m.id) || [];
+      if(arr.length === 0) continue;
+
+      const group = document.createElement("div");
+      group.className = "item";
+      group.style.flexDirection = "column";
+      group.style.alignItems = "stretch";
+
+      const head = document.createElement("div");
+      head.style.display = "flex";
+      head.style.justifyContent = "space-between";
+      head.style.alignItems = "center";
+      head.style.gap = "10px";
+
+      const tag = document.createElement("div");
+      tag.className = "tag";
+      tag.textContent = m.id;
+
+      const doneCount = arr.filter(x=>x.done).length;
+      const count = document.createElement("div");
+      count.className = "tiny";
+      count.textContent = `${doneCount}/${arr.length} done`;
+
+      head.appendChild(tag);
+      head.appendChild(count);
+
+      const list = document.createElement("div");
+      list.style.display = "flex";
+      list.style.flexDirection = "column";
+      list.style.gap = "8px";
+      list.style.marginTop = "10px";
+
+      arr.forEach(t=>{
+        const row = document.createElement("div");
+        row.style.display = "flex";
+        row.style.alignItems = "center";
+        row.style.justifyContent = "space-between";
+        row.style.gap = "10px";
+        row.style.border = "1px solid rgba(0,0,0,0.08)";
+        row.style.borderRadius = "12px";
+        row.style.padding = "8px 10px";
+        row.style.background = "rgba(255,255,255,0.78)";
+
+        const left = document.createElement("div");
+        left.style.display = "flex";
+        left.style.alignItems = "center";
+        left.style.gap = "10px";
+        left.style.flex = "1";
+
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.checked = !!t.done;
+        cb.onchange = () => {
+          t.done = cb.checked;
+          save();
+          renderTasks();
+        };
+
+        const text = document.createElement("div");
+        text.style.fontWeight = "900";
+        text.style.opacity = t.done ? "0.55" : "1";
+        text.style.textDecoration = t.done ? "line-through" : "none";
+        text.textContent = t.text;
+
+        left.appendChild(cb);
+        left.appendChild(text);
+
+        const del = document.createElement("button");
+        del.className = "btnGhost";
+        del.textContent = "Delete";
+        del.onclick = () => {
+          state.tasks = state.tasks.filter(x => x.id !== t.id);
+          save();
+          renderTasks();
+        };
+
+        row.appendChild(left);
+        row.appendChild(del);
+        list.appendChild(row);
+      });
+
+      group.appendChild(head);
+      group.appendChild(list);
+      container.appendChild(group);
+    }
+
+    wrap.innerHTML = "";
+    wrap.appendChild(container);
+  }
+
+  $("addTaskBtn").onclick = () => {
+    const moduleId = $("taskModule").value;
+    const text = $("taskText").value.trim();
+    if(!moduleId){ alert("Pick a module."); return; }
+    if(!text){ alert("Type a task."); return; }
+
+    if(!Array.isArray(state.tasks)) state.tasks = [];
+    state.tasks.push({ id: uuid(), moduleId, text, done:false, createdAt: Date.now() });
+
+    $("taskText").value = "";
+    save();
+    renderTasks();
+  };
+
+  $("clearDoneBtn").onclick = () => {
+    if(!Array.isArray(state.tasks) || state.tasks.length === 0) return;
+    state.tasks = state.tasks.filter(t => !t.done);
+    save();
+    renderTasks();
+  };
+
+  // -------------------- CALENDAR --------------------
+  function calendarCursorDate(){
+    if(state.calendarCursor) return startOfMonth(parseYMD(state.calendarCursor));
+    return startOfMonth(new Date());
+  }
+  function setCalendarCursor(d){
+    state.calendarCursor = `${d.getFullYear()}-${pad2(d.getMonth()+1)}-01`;
+    save();
+  }
+  function selectedDate(){
+    return state.selectedDate || todayYMD();
+  }
+  function setSelectedDate(ymdStr){
+    state.selectedDate = ymdStr;
+    $("evtDate").value = ymdStr;
+    $("swDate").value = ymdStr;
+    save();
+    refreshCalendar();
+    refreshEventListForSelectedDate();
+    refreshSessionsForDate();
+  }
+
+  function eventsByDayMap(){
+    const map = new Map();
+    for(const e of state.events){
+      if(!map.has(e.date)) map.set(e.date, []);
+      map.get(e.date).push(e);
+    }
+    for(const [k,arr] of map.entries()){
+      arr.sort((a,b)=>(a.time||"").localeCompare(b.time||""));
+      map.set(k,arr);
+    }
+    return map;
+  }
+
+  function refreshCalendar(){
+    const cursor = calendarCursorDate();
+    $("monthLabel").textContent = cursor.toLocaleDateString(undefined,{month:"long",year:"numeric"});
+
+    const grid = $("calGrid");
+    grid.innerHTML = "";
+
+    ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].forEach(h=>{
+      const div=document.createElement("div");
+      div.className="calHead";
+      div.textContent=h;
+      grid.appendChild(div);
+    });
+
+    const start = startOfMonth(cursor);
+    const startWeekday = (start.getDay()+6)%7;
+    const gridStart = addDays(start, -startWeekday);
+    const days = Array.from({length:42},(_,i)=>addDays(gridStart,i));
+    const map = eventsByDayMap();
+    const sel = selectedDate();
+
+    for(const d of days){
+      const key = ymd(d);
+      const inMonth = d.getMonth()===cursor.getMonth();
+      const cell=document.createElement("div");
+      cell.className = "calCell" + (inMonth?"":" dim") + (key===sel?" sel":"");
+      cell.title = prettyDate(key);
+
+      const top=document.createElement("div");
+      top.className="calNumRow";
+      const num=document.createElement("div");
+      num.className="calNum";
+      num.textContent=d.getDate();
+
+      const evts=map.get(key)||[];
+      const dot=document.createElement("div");
+      dot.className="dot";
+      dot.textContent=evts.length?String(evts.length):"";
+
+      top.appendChild(num);
+      top.appendChild(dot);
+
+      const miniWrap=document.createElement("div");
+      miniWrap.style.display="flex";
+      miniWrap.style.flexDirection="column";
+      miniWrap.style.gap="2px";
+
+      // show up to 1 event because boxes are shorter
+      evts.slice(0,1).forEach(e=>{
+        const mini=document.createElement("div");
+        mini.className="miniEvt";
+        mini.innerHTML = `<span class="miniTime">${e.time||""}</span><span>${escapeHtml(e.title)}</span>`;
+        miniWrap.appendChild(mini);
+      });
+
+      cell.appendChild(top);
+      cell.appendChild(miniWrap);
+      cell.onclick=()=>setSelectedDate(key);
+      grid.appendChild(cell);
+    }
+  }
+
+  $("prevMonth").onclick=()=>{
+    const c=calendarCursorDate();
+    setCalendarCursor(addMonths(c,-1));
+    refreshCalendar();
+  };
+  $("nextMonth").onclick=()=>{
+    const c=calendarCursorDate();
+    setCalendarCursor(addMonths(c, 1));
+    refreshCalendar();
+  };
+
+  // -------------------- EVENTS --------------------
+  function refreshEventListForSelectedDate(){
+    const day=selectedDate();
+    const list=state.events.filter(e=>e.date===day).sort((a,b)=>(a.time||"").localeCompare(b.time||""));
+    if(list.length===0){ $("evtList").textContent="No events."; return; }
+
+    const wrap=document.createElement("div");
+    list.forEach(e=>{
+      const div=document.createElement("div");
+      div.className="item";
+
+      const left=document.createElement("div");
+      left.style.display="flex"; left.style.flexDirection="column"; left.style.gap="4px";
+
+      const title=document.createElement("div");
+      title.style.fontWeight="1000";
+      title.textContent=e.title;
+
+      const meta=document.createElement("div");
+      meta.className="tiny";
+      meta.textContent = `${e.time||"—"}${e.moduleId? " • "+e.moduleId:""}`;
+
+      left.appendChild(title);
+      left.appendChild(meta);
+
+      const del=document.createElement("button");
+      del.className="btnGhost";
+      del.textContent="Delete";
+      del.onclick=()=>{
+        state.events = state.events.filter(x=>x.id!==e.id);
+        save();
+        refreshCalendar();
+        refreshEventListForSelectedDate();
+      };
+
+      div.appendChild(left);
+      div.appendChild(del);
+      wrap.appendChild(div);
+    });
+
+    $("evtList").innerHTML="";
+    $("evtList").appendChild(wrap);
+  }
+
+  $("addEvtBtn").onclick=()=>{
+    const date=$("evtDate").value;
+    const time=$("evtTime").value||"00:00";
+    const title=$("evtTitle").value.trim();
+    const moduleId=$("evtModule").value;
+    if(!date){alert("Pick a date.");return;}
+    if(!title){alert("Type a title.");return;}
+
+    state.events.push({id:uuid(), date, time, title, moduleId});
+    $("evtTitle").value="";
+    save();
+    setSelectedDate(date);
+    refreshCalendar();
+    refreshEventListForSelectedDate();
+  };
+
+  // -------------------- WHEEL --------------------
+  const wheel=$("wheel");
+  const wctx=wheel.getContext("2d");
+  let wheelAngle=0;
+  let wheelSpinning=false;
+
+  function enabledModules(){
+    return state.modules.filter(m=>m.enabled);
+  }
+
+  function drawWheel(){
+    const mods=enabledModules();
+    const list=mods.length?mods:[{id:"NONE",name:"Enable modules"}];
+    const n=list.length;
+
+    const size=wheel.width;
+    const cx=size/2, cy=size/2;
+    const r=150;
+    wctx.clearRect(0,0,size,size);
+
+    const step=Math.PI*2/n;
+
+    for(let i=0;i<n;i++){
+      const a0=wheelAngle + i*step;
+      const a1=a0+step;
+      wctx.beginPath();
+      wctx.moveTo(cx,cy);
+      wctx.arc(cx,cy,r,a0,a1);
+      wctx.closePath();
+      wctx.fillStyle = PASTELS[i%PASTELS.length];
+      wctx.fill();
+      wctx.strokeStyle="rgba(0,0,0,0.10)";
+      wctx.lineWidth=2;
+      wctx.stroke();
+
+      const mid=(a0+a1)/2;
+      wctx.save();
+      wctx.translate(cx,cy);
+      wctx.rotate(mid);
+      wctx.textAlign="right";
+      wctx.textBaseline="middle";
+      wctx.fillStyle="rgba(0,0,0,0.75)";
+      wctx.font="1000 14px system-ui";
+      wctx.fillText(list[i].id, r-14, 0);
+      wctx.restore();
+    }
+
+    // center
+    wctx.beginPath();
+    wctx.arc(cx,cy,52,0,Math.PI*2);
+    wctx.fillStyle="white";
+    wctx.fill();
+    wctx.strokeStyle="rgba(0,0,0,0.12)";
+    wctx.lineWidth=2;
+    wctx.stroke();
+    wctx.fillStyle="rgba(0,0,0,0.75)";
+    wctx.font="1000 14px system-ui";
+    wctx.textAlign="center";
+    wctx.textBaseline="middle";
+    wctx.fillText(wheelSpinning?"Spinning…":"SPIN", cx, cy);
+
+    // pointer
+    wctx.save();
+    wctx.translate(cx, cy - r - 6);
+    wctx.beginPath();
+    wctx.moveTo(0,0);
+    wctx.lineTo(-12,-18);
+    wctx.lineTo(12,-18);
+    wctx.closePath();
+    wctx.fillStyle="#111";
+    wctx.fill();
+    wctx.restore();
+  }
+
+  function pickIndex(a,n){
+    const step=(Math.PI*2)/n;
+    const normalized = ((-Math.PI/2 - a) % (Math.PI*2) + Math.PI*2) % (Math.PI*2);
+    return Math.min(n-1, Math.max(0, Math.floor(normalized/step)));
+  }
+
+  function spinWheel(){
+    if(wheelSpinning) return;
+    const mods=enabledModules();
+    const list=mods.length?mods:[{id:"NONE",name:"Enable modules"}];
+
+    wheelSpinning=true;
+    $("spinBtn").disabled=true;
+    $("wheelResult").innerHTML=`Picked: <b>…</b>`;
+
+    const start=performance.now();
+    const duration=2200 + Math.random()*800;
+    const startAngle=wheelAngle;
+    const target=startAngle + (6+Math.random()*4)*Math.PI*2 + Math.random()*Math.PI*2;
+    const ease=(t)=>1-Math.pow(1-t,3);
+
+    function tick(now){
+      const t=Math.min(1, Math.max(0,(now-start)/duration));
+      wheelAngle = startAngle + (target-startAngle)*ease(t);
+      drawWheel();
+      if(t<1) requestAnimationFrame(tick);
+      else{
+        wheelSpinning=false;
+        $("spinBtn").disabled=false;
+        const idx=pickIndex(wheelAngle, list.length);
+        const picked=list[idx];
+        $("wheelResult").innerHTML = `Picked: <b>${picked.id}</b> — ${picked.name}`;
+        if(picked.id && picked.id !== "NONE") $("swModule").value = picked.id;
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+
+  $("spinBtn").onclick=spinWheel;
+  wheel.onclick=spinWheel;
+
+  // -------------------- STOPWATCH --------------------
+  let swRunning = false;
+  let swStartTs = null;
+  let swElapsedMs = 0;
+  let swRaf = null;
+
+  function fmtMs(ms){
+    ms = Math.max(0, Math.floor(ms));
+    const totalSec = Math.floor(ms/1000);
+    const h = Math.floor(totalSec/3600);
+    const m = Math.floor((totalSec%3600)/60);
+    const s = totalSec%60;
+    return `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  }
+
+  function swUpdate(){
+    const now = performance.now();
+    const live = swRunning ? (swElapsedMs + (now - swStartTs)) : swElapsedMs;
+    $("swTime").textContent = fmtMs(live);
+    if(swRunning) swRaf = requestAnimationFrame(swUpdate);
+  }
+
+  function swSetButtons(){
+    $("swStartBtn").disabled = swRunning;
+    $("swPauseBtn").disabled = !swRunning && swElapsedMs===0;
+    $("swStopBtn").disabled = (!swRunning && swElapsedMs===0);
+    $("swPauseBtn").textContent = swRunning ? "Pause" : (swElapsedMs>0 ? "Resume" : "Pause");
+  }
+
+  function swStart(){
+    if(swRunning) return;
+    swRunning = true;
+    swStartTs = performance.now();
+    $("swHint").textContent = "Running…";
+    swSetButtons();
+    swUpdate();
+  }
+
+  function swPauseResume(){
+    if(swRunning){
+      const now = performance.now();
+      swElapsedMs += (now - swStartTs);
+      swRunning = false;
+      swStartTs = null;
+      if(swRaf) cancelAnimationFrame(swRaf);
+      $("swHint").textContent = "Paused.";
+      swSetButtons();
+      $("swTime").textContent = fmtMs(swElapsedMs);
+    }else{
+      if(swElapsedMs <= 0) return;
+      swRunning = true;
+      swStartTs = performance.now();
+      $("swHint").textContent = "Running…";
+      swSetButtons();
+      swUpdate();
+    }
+  }
+
+  function swReset(){
+    swRunning = false;
+    swStartTs = null;
+    swElapsedMs = 0;
+    if(swRaf) cancelAnimationFrame(swRaf);
+    $("swHint").textContent = "Ready.";
+    $("swTime").textContent = "0:00:00";
+    swSetButtons();
+  }
+
+  function swStopAndSave(){
+    if(swRunning){
+      const now = performance.now();
+      swElapsedMs += (now - swStartTs);
+      swRunning = false;
+      swStartTs = null;
+      if(swRaf) cancelAnimationFrame(swRaf);
+    }
+    if(swElapsedMs <= 0){ swSetButtons(); return; }
+
+    const date = $("swDate").value;
+    const moduleId = $("swModule").value;
+    if(!date){ alert("Pick a date."); return; }
+    if(!moduleId){ alert("Pick a module."); return; }
+
+    state.sessions.push({
+      id: uuid(),
+      date,
+      moduleId,
+      ms: Math.round(swElapsedMs),
+      createdAt: Date.now()
+    });
+    save();
+
+    $("swHint").textContent = "Saved. (Resetting timer)";
+    refreshSessionsForDate();
+    refreshAnalytics();
+
+    swReset();
+  }
+
+  $("swStartBtn").onclick = swStart;
+  $("swPauseBtn").onclick = swPauseResume;
+  $("swStopBtn").onclick = swStopAndSave;
+  $("swResetBtn").onclick = swReset;
+
+  function refreshSessionsForDate(){
+    const day = $("swDate").value || selectedDate();
+    const list = state.sessions
+      .filter(s => s.date === day)
+      .sort((a,b)=> (b.createdAt||0)-(a.createdAt||0));
+
+    if(list.length === 0){
+      $("swSessions").textContent = "No sessions yet.";
+      return;
+    }
+
+    const wrap = document.createElement("div");
+    list.slice(0,8).forEach(s=>{
+      const div = document.createElement("div");
+      div.className="item";
+      div.style.alignItems="center";
+
+      const left = document.createElement("div");
+      left.innerHTML = `<span class="tag">${s.moduleId}</span>
+                        <span style="font-weight:1000; margin-left:8px;">${(s.ms/3600000).toFixed(2)}h</span>
+                        <span class="tiny" style="margin-left:8px;">(${fmtMs(s.ms)})</span>`;
+
+      const del = document.createElement("button");
+      del.className="btnGhost";
+      del.textContent="Delete";
+      del.onclick=()=>{
+        state.sessions = state.sessions.filter(x=>x.id!==s.id);
+        save();
+        refreshSessionsForDate();
+        refreshAnalytics();
+      };
+
+      div.appendChild(left);
+      div.appendChild(del);
+      wrap.appendChild(div);
+    });
+
+    $("swSessions").innerHTML="";
+    $("swSessions").appendChild(wrap);
+  }
+
+  $("swDate").addEventListener("change", ()=>{
+    setSelectedDate($("swDate").value);
+  });
+
+  // -------------------- ANALYTICS --------------------
+  function getPeriodRange(type, dateYMD){
+    const d = parseYMD(dateYMD);
+    if(type==="day"){
+      const s=new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0,0,0,0);
+      const e=new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23,59,59,999);
+      return {start:s, end:e, label: prettyDate(dateYMD)};
+    }
+    if(type==="month"){
+      const s=startOfMonth(d);
+      const e=new Date(d.getFullYear(), d.getMonth()+1, 0, 23,59,59,999);
+      return {start:s, end:e, label: d.toLocaleDateString(undefined,{month:"long",year:"numeric"})};
+    }
+    const s=startOfWeek(d);
+    const e=endOfWeek(d);
+    return {start:s, end:e, label: `Week • ${fmtRange(s,e)}`};
+  }
+
+  function withinRange(session, start, end){
+    const dt = parseYMD(session.date);
+    return dt>=start && dt<=end;
+  }
+
+  function aggregateSessions(type, dateYMD){
+    const {start, end, label} = getPeriodRange(type, dateYMD);
+    const totals = new Map();
+    state.modules.forEach(m=>totals.set(m.id, 0));
+
+    let grand = 0;
+    for(const s of state.sessions){
+      if(withinRange(s, start, end)){
+        const hrs = (Number(s.ms||0))/3600000;
+        totals.set(s.moduleId, (totals.get(s.moduleId)||0) + hrs);
+        grand += hrs;
+      }
+    }
+    return {start, end, label, totals, grand};
+  }
+
+  function roundRect(ctx,x,y,w,h,r){
+    const rr=Math.min(r,w/2,h/2);
+    ctx.beginPath();
+    ctx.moveTo(x+rr,y);
+    ctx.arcTo(x+w,y,x+w,y+h,rr);
+    ctx.arcTo(x+w,y+h,x,y+h,rr);
+    ctx.arcTo(x,y+h,x,y,rr);
+    ctx.arcTo(x,y,x+w,y,rr);
+    ctx.closePath();
+  }
+
+  function drawBarChart(labels, values){
+    const c=$("barChart");
+    const ctx=c.getContext("2d");
+    const dpr=window.devicePixelRatio||1;
+    const cssW=c.clientWidth || 820;
+    const cssH=260;
+
+    c.style.height=cssH+"px";
+    c.width=Math.floor(cssW*dpr);
+    c.height=Math.floor(cssH*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+
+    const w=cssW, h=cssH;
+    ctx.clearRect(0,0,w,h);
+
+    const padL=44, padR=10, padT=14, padB=44;
+    const chartW=w-padL-padR;
+    const chartH=h-padT-padB;
+
+    const maxV=Math.max(1, ...values);
+
+    ctx.strokeStyle="rgba(0,0,0,0.10)";
+    ctx.lineWidth=1;
+    for(let i=0;i<=4;i++){
+      const y=padT + chartH*(i/4);
+      ctx.beginPath();
+      ctx.moveTo(padL,y);
+      ctx.lineTo(padL+chartW,y);
+      ctx.stroke();
+    }
+
+    const n=labels.length;
+    const gap=10;
+    const barW=Math.max(10, (chartW - gap*(n-1))/n);
+
+    values.forEach((v,i)=>{
+      const x=padL + i*(barW+gap);
+      const bh=(v/maxV)*chartH;
+      const y=padT + (chartH-bh);
+
+      ctx.fillStyle=PASTELS[i%PASTELS.length];
+      ctx.strokeStyle="rgba(0,0,0,0.12)";
+      ctx.lineWidth=1;
+
+      roundRect(ctx,x,y,barW,bh,12);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle="rgba(0,0,0,0.78)";
+      ctx.font="1000 12px system-ui";
+      ctx.textAlign="center";
+      ctx.textBaseline="bottom";
+      ctx.fillText(v.toFixed(2), x+barW/2, y-4);
+
+      ctx.fillStyle="rgba(0,0,0,0.72)";
+      ctx.font="1000 12px system-ui";
+      ctx.textBaseline="top";
+      ctx.fillText(labels[i], x+barW/2, padT+chartH+8);
+    });
+
+    ctx.fillStyle="rgba(0,0,0,0.62)";
+    ctx.font="900 12px system-ui";
+    ctx.textAlign="right";
+    ctx.textBaseline="middle";
+    for(let i=0;i<=4;i++){
+      const v = maxV*(1-i/4);
+      const y = padT + chartH*(i/4);
+      ctx.fillText(v.toFixed(1), padL-6, y);
+    }
+  }
+
+  function refreshAnalytics(){
+    const type=$("periodType").value;
+    const dateYMD=$("periodDate").value || todayYMD();
+    const agg=aggregateSessions(type, dateYMD);
+
+    $("periodLabel").textContent=agg.label;
+    $("periodMeta").textContent=`Sessions counted from ${ymd(agg.start)} to ${ymd(agg.end)}.`;
+    $("periodTotal").textContent=`Total: ${agg.grand.toFixed(2)}h`;
+
+    const labels=state.modules.map(m=>m.id);
+    const values=state.modules.map(m=>Number(agg.totals.get(m.id)||0));
+    drawBarChart(labels, values);
+
+    const items = state.modules
+      .map(m=>({id:m.id,name:m.name,hours:Number(agg.totals.get(m.id)||0)}))
+      .sort((a,b)=>b.hours-a.hours);
+
+    const div=document.createElement("div");
+    div.style.display="flex";
+    div.style.flexDirection="column";
+    div.style.gap="8px";
+
+    items.forEach((it,idx)=>{
+      const row=document.createElement("div");
+      row.className="item";
+      row.style.alignItems="center";
+
+      const left=document.createElement("div");
+      left.innerHTML = `<span class="tag" style="background:${PASTELS[idx%PASTELS.length]}">${it.id}</span>
+                        <span style="font-weight:1000; margin-left:8px;">${escapeHtml(it.name)}</span>
+                        <span class="tiny" style="margin-left:8px;">${it.hours.toFixed(2)}h</span>`;
+
+      const share = agg.grand>0 ? (it.hours/agg.grand*100) : 0;
+      const right=document.createElement("div");
+      right.className="pill";
+      right.textContent = `${share.toFixed(0)}%`;
+
+      row.appendChild(left);
+      row.appendChild(right);
+      div.appendChild(row);
+    });
+
+    $("breakdown").innerHTML="";
+    $("breakdown").appendChild(div);
+  }
+
+  function shiftPeriod(dir){
+    const type=$("periodType").value;
+    const cur=parseYMD($("periodDate").value || todayYMD());
+    let next;
+    if(type==="day") next=addDays(cur, dir);
+    else if(type==="month") next=new Date(cur.getFullYear(), cur.getMonth()+dir, 1);
+    else next=addDays(cur, dir*7);
+
+    $("periodDate").value = ymd(next);
+    refreshAnalytics();
+  }
+
+  $("prevPeriod").onclick=()=>shiftPeriod(-1);
+  $("nextPeriod").onclick=()=>shiftPeriod( 1);
+  $("periodType").onchange=refreshAnalytics;
+  $("periodDate").onchange=refreshAnalytics;
+
+  // -------------------- BACKUP / RESET --------------------
+  $("exportBtn").onclick=()=>{
+    const blob=new Blob([JSON.stringify(state,null,2)], {type:"application/json"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;
+    a.download="study_ops_backup.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+  $("importBtn").onclick=()=>$("importFile").click();
+  $("importFile").onchange=(e)=>{
+    const file=e.target.files && e.target.files[0];
+    if(!file) return;
+    const reader=new FileReader();
+    reader.onload=()=>{
+      try{
+        const obj=JSON.parse(String(reader.result||"{}"));
+        state={...clone(DEFAULT), ...obj};
+        save();
+        bootUI();
+        alert("Imported.");
+      }catch{
+        alert("Invalid file.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value="";
+  };
+
+  $("resetBtn").onclick=()=>{
+    if(!confirm("Reset EVERYTHING?")) return;
+    state=clone(DEFAULT);
+    save();
+    swReset();
+    bootUI();
+  };
+
+  // -------------------- INIT --------------------
+  function bootUI(){
+    refreshModuleSelects();
+
+    const t=todayYMD();
+    if(!state.selectedDate) state.selectedDate=t;
+    $("evtDate").value=state.selectedDate;
+    $("swDate").value=state.selectedDate;
+
+    if(!state.calendarCursor){
+      const c=startOfMonth(new Date());
+      state.calendarCursor=`${c.getFullYear()}-${pad2(c.getMonth()+1)}-01`;
+      save();
+    }
+
+    renderTasks();
+    refreshCalendar();
+    refreshEventListForSelectedDate();
+    refreshSessionsForDate();
+
+    $("periodType").value="week";
+    $("periodDate").value=t;
+    refreshAnalytics();
+
+    drawWheel();
+    swSetButtons();
+  }
+
+  bootUI();
+</script>
+</body>
+</html>
